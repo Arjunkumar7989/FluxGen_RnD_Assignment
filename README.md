@@ -1,156 +1,76 @@
-# FluxGen R&D Internship – Round 1 Assignment
+PROBLEM 1 – The Incomplete Geometry (FINAL R&D-GRADE WRITEUP)
+My understanding of the problem
 
-This repository contains my solutions for the **FluxGen R&D Internship – Round 1 Assignment**.  
-The primary objective of this work is to demonstrate **physics-informed reasoning, spatial modeling, uncertainty awareness, and decision-safe system design**, rather than producing black-box numerical outputs.
+The core challenge is to estimate the total storage capacity of an irregular underground reservoir when only 65% of its spatial depth data is available. The remaining 35% must be inferred in a physically realistic way without introducing bias from simplistic averaging.
 
-The focus is on **how and why** models behave under incomplete data, delays, and real-world noise — aligning with R&D-driven engineering workflows.
+Key physical principles involved
 
----
+Spatial continuity, natural boundary irregularity, and correlation between neighboring depth measurements govern the reservoir geometry. Since the walls are naturally formed, the surface is expected to be smooth but non-uniform, without engineered symmetry.
 
-## 📁 Repository Structure
+My approach
 
-FluxGen_RnD_Assignment/
-│
-├── problem_1_incomplete_geometry/
-│   ├── interpolation.py
-│   ├── uncertainty_analysis.py
-│   └── volume_estimation.py
-│
-├── problem_2_spectral_discrepancy/
-│   ├── spectral_correction.py
-│   ├── spatial_weighting.py
-│   └── validation_framework.py
-│
-├── problem_3_mass_balance/
-│   ├── delay_model.py
-│   ├── mass_balance_model.py
-│   └── temperature_correction.py
-│
-├── problem_4_groundwater_model/
-│   ├── grid_model.py
-│   ├── influence_functions.py
-│   ├── source_propagation.py
-│   ├── stress_analysis.py
-│   ├── interest_zone.py
-│   └── main.py
-│
-└── README.md
+Simple averaging is inadequate because it ignores spatial correlation and boundary curvature. Instead, spatial interpolation techniques that respect physical continuity are required.
+Kriging is preferred over spline or triangulation methods because it explicitly models spatial covariance between measurement points. This aligns with naturally formed reservoir walls, where depth variations are correlated over distance rather than changing arbitrarily. The inferred surface for the unmeasured region is generated based on nearby measured depths while preserving realistic gradients.
 
----
+Assumptions & limitations
 
-## 🧠 Problem-wise Modeling Summary
+This approach assumes spatial smoothness and correlation continuity across the inaccessible region. It may fail in zones with sharp geological discontinuities such as faults or sudden lithological changes that violate smooth spatial behavior.
 
-### **Problem 1 – Incomplete Geometry**
-This problem addresses volume estimation for an irregular underground reservoir with only partial spatial measurements.
+Uncertainty quantification
 
-Instead of simple averaging, the approach uses **distance-aware spatial interpolation** to respect geometric continuity.  
-Uncertainty arising from unmeasured regions is explicitly quantified using **Monte Carlo–based sampling**, producing confidence bounds rather than single deterministic outputs.
+The dominant source of uncertainty arises from spatial sparsity rather than sensor noise. Multiple spatial realizations can be generated using Monte Carlo sampling of interpolation parameters, producing a distribution of possible volumes rather than a single estimate.
 
-Key emphasis:  
-• Spatial realism  
-• Uncertainty propagation  
-• Avoiding false precision
+Validation strategy
 
----
+The model is considered valid if the estimated total volume falls within ±10% of independent survey data, historical capacity records, or alternative interpolation methods applied to known regions. Sensitivity analysis is used to ensure no single region disproportionately influences the final estimate.
 
-### **Problem 2 – Spectral Discrepancy**
-This problem focuses on distinguishing **true biological signals** from **optical or atmospheric artifacts** in satellite-derived indices.
+# PROBLEM 2 – The Spectral Discrepancy (FINAL R&D-GRADE WRITEUP)
+My understanding of the problem
 
-The solution performs **spectral consistency checks** across visible and Near-Infrared (NIR) bands to identify false greenness signals.  
-A **spatial confidence-weighting mechanism** is applied, where confidence decays with distance from verified sites and with spectral inconsistency.
+The challenge is to reconcile a satellite-detected increase in greenness across 50 water bodies with conflicting ground truth from 5 verified clear sites, while deciding whether a regional algae bloom alert should remain active.
 
-Before triggering a region-level alert, a **validation gate** checks secondary environmental factors (e.g., weather, atmospheric conditions) to prevent false positives.
+Key physical principles involved
 
-Key emphasis:  
-• Decision-safe alerting  
-• Partial observability handling  
-• Risk-aware validation logic
+Atmospheric scattering, surface reflectance, and sensor band sensitivity can distort satellite-based greenness indices. Optical interference does not necessarily correspond to biological activity.
 
----
+My approach
 
-### **Problem 3 – The Balancing Act**
-This problem models a closed watershed system using **first-principles mass balance**.
+Non-biological factors such as atmospheric haze, sun-glint, and suspended sediments can falsely elevate visible-band greenness. Near-Infrared (NIR) bands are used to cross-check biological activity, as true algal biomass strongly reflects in NIR while optical artifacts do not.
+To decide alert continuation, spatial weighting is applied. The 5 verified sites reduce uncertainty locally, but the remaining 45 sites still carry risk. A Bayesian update framework is used where field-verified clarity lowers probability only in nearby spatial clusters, not across the entire region.
 
-The model accounts for:
-• Temporary environmental storage  
-• Natural losses (e.g., infiltration, evaporation)  
-• Time-delay between rainfall input and outlet response  
-• Temperature-driven volume expansion without misinterpreting mass change
+Assumptions & limitations
 
-Time delays are explicitly modeled to ensure early-warning systems do not fail due to lagged system responses.
+This approach assumes spatial dependency between nearby water bodies. It may overestimate risk if the unverified sites experience fundamentally different environmental conditions.
 
-Key emphasis:  
-• Conservation laws  
-• Physical causality  
-• Sensor-aware modeling
+Validation framework
 
----
+Before issuing a high-risk alert, the system checks secondary data including recent rainfall, wind speed, surface temperature, and historical bloom seasonality. Alerts are triggered only if multispectral confirmation and environmental conditions jointly support biological plausibility.
 
-### **Problem 4 – Groundwater Spatial–Mathematical Model**
-This module implements a **grid-based groundwater head model** influenced by four interacting consumption sources:
-Agriculture, Built-up areas, Forests, and Water bodies.
+Success criteria
 
-Each source generates an independent drawdown field, combined through **superposition**, subject to:
-• Distance-based decay  
-• Directional head gradients  
-• Mass-balance consistency
+An alert is allowed only if both spectral indicators and secondary environmental variables exceed predefined thresholds, reducing false positives caused by optical artifacts.
 
-Groundwater stress is evaluated using hydraulic head gradients, and predefined interest zones are analyzed for multi-source sensitivity.
+# PROBLEM 3 – The Balancing Act (FINAL R&D-GRADE WRITEUP)
+My understanding of the problem
 
-Key emphasis:  
-• Spatial coupling  
-• Model stability  
-• Physically constrained propagation
+The objective is to reconcile a mass-balance mismatch in a closed watershed system where observed inflows, storage change, and outflows do not sum correctly.
 
----
+Key physical principles involved
 
-## ▶️ How to Run (Problem 4)
+Mass conservation, delayed hydrological response, subsurface storage, evaporation, and sensor uncertainty govern the system behavior.
 
-Navigate to the groundwater model directory:
+My approach
 
-```bash
-cd problem_4_groundwater_model
-Run the model:
+The missing 400 units can be attributed to subsurface infiltration, soil moisture storage, groundwater recharge, evaporation losses, and potential sensor lag or calibration error. These components are explicitly categorized into environmental storage, natural loss, and measurement uncertainty.
 
-bash
-Copy code
-python main.py
-Example output:
+Delay modeling
 
-text
-Copy code
-Critical Zone Report: {'Head': 99.89, 'Stress': 0.0091}
-(Exact values may vary slightly depending on configuration.)
+The 12-hour delay between rainfall and outlet response is modeled using a time-lag or convolution-based response function representing travel time through the watershed. This delay is critical for early warning systems because immediate outlet readings cannot be used to infer real-time system saturation.
 
-🔬 Design Philosophy
-• Physics-first, interpretable modeling
-• Explicit handling of uncertainty and incomplete data
-• Modular design for validation and extension
-• Decision-safe logic prioritizing stability over overfitting
+Temperature impact on volume vs mass
 
-The models are intentionally implemented as physically consistent baselines, avoiding unnecessary complexity unless supported by data.
+A 10°C temperature increase causes thermal expansion of water, affecting volume without changing mass. The digital twin accounts for this by correcting volume measurements using temperature-adjusted density relationships, preventing misinterpretation of expansion as added water input.
 
-👤 Author
-Arjun Kumar Jatavath
-GitHub: https://github.com/Arjunkumar7989
+Validation strategy
 
-📌 Notes
-This repository is submitted as part of the FluxGen R&D Internship evaluation process.
-The focus is on model behavior, reasoning clarity, and physical correctness, not on matching predefined numerical outputs.
-
-yaml
-Copy code
-
----
-
-## 🔒 Final instruction (important)
-
-- ✅ **Use this README exactly**
-- ❌ Do NOT add more explanations
-- ❌ Do NOT touch code now
-- ✅ One clean commit → push
-
-```bash
-git add README.md
-git commit -m "Finalize R&D-focused README aligned with FluxGen evaluation criteria"
-git push
+The digital twin is validated if cumulative inflow equals corrected outflow plus adjusted storage change within acceptable tolerance limits over multiple rainfall events.
